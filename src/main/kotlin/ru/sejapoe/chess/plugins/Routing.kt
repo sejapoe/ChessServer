@@ -16,8 +16,8 @@ fun Application.configureRouting() {
         get("/") {
             call.respondText("Hello World!")
         }
-        get("/move") {
-            Logger.getGlobal().info("move")
+        post("/move") {
+            Logger.getGlobal().info(call.receiveText())
             call.respond(200)
         }
         get<MyLocation> {
