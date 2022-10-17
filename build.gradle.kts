@@ -6,6 +6,7 @@ plugins {
     application
     kotlin("jvm") version "1.7.20"
     id("io.ktor.plugin") version "2.1.2"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
 }
 
 group = "ru.sejapoe.chess"
@@ -36,6 +37,7 @@ dependencies {
     implementation("io.ktor:ktor-network-tls:2.1.2")
     implementation("io.ktor:ktor-network-tls-jvm:2.1.2")
     implementation("io.ktor:ktor-network-tls-certificates-jvm:2.1.2")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.1.2")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
