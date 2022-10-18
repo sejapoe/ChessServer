@@ -1,0 +1,1 @@
+web: ./build/install/ChessServer-shadow/bin/ChessServer
