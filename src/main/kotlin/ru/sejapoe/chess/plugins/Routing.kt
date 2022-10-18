@@ -9,6 +9,8 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import ru.sejapoe.chess.core.Game
+import ru.sejapoe.chess.core.GameCreatingData
+import ru.sejapoe.chess.core.PieceColor
 import ru.sejapoe.chess.core.User
 
 fun Application.configureRouting() {
@@ -24,21 +26,29 @@ fun Application.configureRouting() {
         }
         get("/matchmakingStatus/{id}") {
             val id = call.parameters["id"]?.toLong() ?: return@get call.respond(HttpStatusCode.BadRequest)
-            println(id)
             val user = User.users[id] ?: return@get call.respond(HttpStatusCode.NotFound)
-            println(user)
             if (Game.matchmaking.contains(user)) return@get call.respond(HttpStatusCode.OK)
-            val game = Game.games.values.find {
-                it.player1 == user || it.player2 == user
-            } ?: return@get call.respond(HttpStatusCode.InternalServerError)
-            println(game)
-            call.respond(HttpStatusCode.Created, game.id)
+            for (v in Game.games.values) {
+                when (user) {
+                    v.playerWhite -> return@get call.respond(
+                        HttpStatusCode.Created,
+                        GameCreatingData(v.id, PieceColor.WHITE)
+                    )
+
+                    v.playerBlack -> return@get call.respond(
+                        HttpStatusCode.Created,
+                        GameCreatingData(v.id, PieceColor.BLACK)
+                    )
+                }
+
+            }
+            call.respond(HttpStatusCode.InternalServerError)
         }
         get("/game/{id}") {
             val id = call.parameters["id"]?.toLong() ?: return@get call.respond(HttpStatusCode.BadRequest)
             val game = Game.games[id] ?: return@get call.respond(HttpStatusCode.NotFound)
 
-            call.respond(HttpStatusCode.OK, game.board)
+            call.respond(HttpStatusCode.OK, game.state)
         }
         post("/game/{id}/move") {
             val id = call.parameters["id"]?.toLong() ?: return@post call.respond(HttpStatusCode.BadRequest)
@@ -47,7 +57,8 @@ fun Application.configureRouting() {
             try {
                 game.applyMove(call.receive())
             } catch (e: Exception) {
-                return@post call.respond(HttpStatusCode.BadRequest)
+                println(e.localizedMessage)
+                return@post call.respond(HttpStatusCode.BadRequest, e.localizedMessage)
             }
             call.respond(HttpStatusCode.OK)
         }

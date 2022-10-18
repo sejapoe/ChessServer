@@ -1,29 +1,34 @@
 package ru.sejapoe.chess.core
 
-import ru.sejapoe.chess.core.Piece.*
+import ru.sejapoe.chess.core.PieceColor.BLACK
+import ru.sejapoe.chess.core.PieceColor.WHITE
+import ru.sejapoe.chess.core.PieceType.*
 import java.util.logging.Logger
+import kotlin.random.Random
 
-class Game(val id: Long, val player1: User, val player2: User) {
-    val board: MutableList<MutableList<Piece?>> = MutableList(8) { r ->
+class Game(val id: Long, val playerWhite: User, val playerBlack: User) {
+    private var turn: PieceColor = WHITE
+    private var turnCount = 0
+    private val board: MutableList<MutableList<PieceData?>> = MutableList(8) { r ->
         MutableList(8) { c ->
             when (r) {
                 0 -> when (c) {
-                    0, 7 -> ROOK_WHITE
-                    1, 6 -> KNIGHT_WHITE
-                    2, 5 -> BISHOP_WHITE
-                    3 -> QUEEN_WHITE
-                    4 -> KING_WHITE
+                    0, 7 -> ROOK(WHITE)
+                    1, 6 -> KNIGHT(WHITE)
+                    2, 5 -> BISHOP(WHITE)
+                    3 -> QUEEN(WHITE)
+                    4 -> KING(WHITE)
                     else -> null
                 }
 
-                1 -> PAWN_WHITE
-                6 -> PAWN_BLACK
+                1 -> PAWN(WHITE)
+                6 -> PAWN(BLACK)
                 7 -> when (c) {
-                    0, 7 -> ROOK_BLACK
-                    1, 6 -> KNIGHT_BLACK
-                    2, 5 -> BISHOP_BLACK
-                    3 -> QUEEN_BLACK
-                    4 -> KING_BLACK
+                    0, 7 -> ROOK(BLACK)
+                    1, 6 -> KNIGHT(BLACK)
+                    2, 5 -> BISHOP(BLACK)
+                    3 -> QUEEN(BLACK)
+                    4 -> KING(BLACK)
                     else -> null
                 }
 
@@ -31,17 +36,22 @@ class Game(val id: Long, val player1: User, val player2: User) {
             }
         }
     }
+    val state: BoardData
+        get() = BoardData(board, turn, turnCount)
 
     fun applyMove(data: PieceMovementData) {
         Logger.getGlobal().info(data.toString())
         val (columnSource, rowSource, columnDest, rowDest) = data
         if (columnDest != -1 && rowDest != -1) {
             board[rowDest][columnDest] = board[rowSource][columnSource]
+            turn = !data.performer
         }
         board[rowSource][columnSource] = null
+        turnCount++
     }
 
     companion object {
+        private val coinFlipper = Random.Default
         val games: MutableMap<Long, Game> = mutableMapOf()
         val matchmaking: MutableSet<User> = mutableSetOf()
 
@@ -49,6 +59,10 @@ class Game(val id: Long, val player1: User, val player2: User) {
 
         fun addUserToQueue(user: User) = matchmaking.add(user)
 
-        fun registerGame(player1: User, player2: User): Game = Game(++id, player1, player2).also { games[it.id] = it }
+        fun registerGame(player1: User, player2: User): Game = if (coinFlipper.nextBoolean()) {
+            Game(++id, player1, player2).also { games[it.id] = it }
+        } else {
+            Game(++id, player2, player1).also { games[it.id] = it }
+        }
     }
 }
