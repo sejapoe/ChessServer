@@ -3,12 +3,12 @@ package ru.sejapoe.chess.core
 import ru.sejapoe.chess.core.PieceColor.BLACK
 import ru.sejapoe.chess.core.PieceColor.WHITE
 import ru.sejapoe.chess.core.PieceType.*
-import java.util.logging.Logger
+import ru.sejapoe.chess.core.turn.*
 import kotlin.random.Random
 
 class Game(val id: Long, val playerWhite: User, val playerBlack: User) {
+    var history: MutableList<Turn> = mutableListOf()
     private var turn: PieceColor = WHITE
-    private var turnCount = 0
     private val board: MutableList<MutableList<PieceData?>> = MutableList(8) { r ->
         MutableList(8) { c ->
             when (r) {
@@ -37,17 +37,36 @@ class Game(val id: Long, val playerWhite: User, val playerBlack: User) {
         }
     }
     val state: BoardData
-        get() = BoardData(board, turn, turnCount)
+        get() = BoardData(board, history.lastOrNull(), turn, history.size)
 
-    fun applyMove(data: PieceMovementData) {
-        Logger.getGlobal().info(data.toString())
-        val (columnSource, rowSource, columnDest, rowDest) = data
-        if (columnDest != -1 && rowDest != -1) {
-            board[rowDest][columnDest] = board[rowSource][columnSource]
-            turn = !data.performer
-        }
+    fun performMove(move: Move) {
+        move(move.move)
+    }
+
+    fun performAttack(attack: Attack) {
+        move(attack.move)
+    }
+
+    fun performCast(cast: Cast) {
+        move(cast.rookMove)
+        move(cast.kingMove)
+    }
+
+    fun performEnPassant(enPassant: EnPassant) {
+        val (_, rowSource, columnDest, _) = enPassant.move
+        move(enPassant.move)
+        board[rowSource][columnDest] = null
+    }
+
+    private fun move(move: PieceMovementData) {
+        val (columnSource, rowSource, columnDest, rowDest) = move
+        board[rowDest][columnDest] = board[rowSource][columnSource]
         board[rowSource][columnSource] = null
-        turnCount++
+    }
+
+    fun perform(turn: Turn) {
+        turn.perform(this)
+        history.add(turn)
     }
 
     companion object {

@@ -8,10 +8,8 @@ import io.ktor.server.locations.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import ru.sejapoe.chess.core.Game
-import ru.sejapoe.chess.core.GameCreatingData
-import ru.sejapoe.chess.core.PieceColor
-import ru.sejapoe.chess.core.User
+import ru.sejapoe.chess.core.*
+import ru.sejapoe.chess.core.turn.*
 
 fun Application.configureRouting() {
     install(Locations) {
@@ -48,14 +46,20 @@ fun Application.configureRouting() {
             val id = call.parameters["id"]?.toLong() ?: return@get call.respond(HttpStatusCode.BadRequest)
             val game = Game.games[id] ?: return@get call.respond(HttpStatusCode.NotFound)
 
-            call.respond(HttpStatusCode.OK, game.state)
+            if (game.state.lastMove != null) call.respond(HttpStatusCode.OK, game.state.lastMove!!)
+            else call.respond(HttpStatusCode.OK, "null")
+        }
+        get("/game/{id}/history") {
+            val id = call.parameters["id"]?.toLong() ?: return@get call.respond(HttpStatusCode.BadRequest)
+            val game = Game.games[id] ?: return@get call.respond(HttpStatusCode.NotFound)
+
+            call.respond(HttpStatusCode.OK, game.history)
         }
         post("/game/{id}/move") {
             val id = call.parameters["id"]?.toLong() ?: return@post call.respond(HttpStatusCode.BadRequest)
             val game = Game.games[id] ?: return@post call.respond(HttpStatusCode.NotFound)
-
             try {
-                game.applyMove(call.receive())
+                game.perform(call.receive())
             } catch (e: Exception) {
                 println(e.localizedMessage)
                 return@post call.respond(HttpStatusCode.BadRequest, e.localizedMessage)

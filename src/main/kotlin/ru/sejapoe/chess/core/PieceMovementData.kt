@@ -8,5 +8,4 @@ data class PieceMovementData(
     val rowSource: Int,
     val columnDest: Int,
     val rowDest: Int,
-    val performer: PieceColor,
 )
