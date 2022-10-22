@@ -14,5 +14,8 @@ class Cast(
     val rookMove: PieceMovementData,
     override val number: Int,
 ) : Turn() {
-    override fun perform(game: Game) = game.performCast(this)
+    override fun perform(game: Game) {
+        super.perform(game)
+        game.performCast(this)
+    }
 }

@@ -69,6 +69,10 @@ class Game(val id: Long, val playerWhite: User, val playerBlack: User) {
         history.add(turn)
     }
 
+    fun performPromotion(promotion: Promotion) {
+        board[promotion.row][promotion.column] = promotion.pieceData
+    }
+
     companion object {
         private val coinFlipper = Random.Default
         val games: MutableMap<Long, Game> = mutableMapOf()

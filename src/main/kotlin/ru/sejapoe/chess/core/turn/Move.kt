@@ -13,5 +13,8 @@ class Move(
     val move: PieceMovementData,
     override val number: Int,
 ) : Turn() {
-    override fun perform(game: Game) = game.performMove(this)
+    override fun perform(game: Game) {
+        super.perform(game)
+        game.performMove(this)
+    }
 }

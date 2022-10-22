@@ -8,7 +8,10 @@ import ru.sejapoe.chess.core.PieceColor
 sealed class Turn() {
     abstract val number: Int
     abstract val performer: PieceColor
-    abstract fun perform(game: Game)
+    var promotion: Promotion? = null
+    open fun perform(game: Game) {
+        promotion?.perform(game)
+    }
 }
 /*
 Turns:

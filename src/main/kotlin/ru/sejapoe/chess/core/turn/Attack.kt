@@ -13,5 +13,8 @@ class Attack(
     val move: PieceMovementData,
     override val number: Int,
 ) : Turn() {
-    override fun perform(game: Game) = game.performAttack(this)
+    override fun perform(game: Game) {
+        super.perform(game)
+        game.performAttack(this)
+    }
 }

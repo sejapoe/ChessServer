@@ -13,5 +13,8 @@ class EnPassant(
     val move: PieceMovementData,
     override val number: Int,
 ) : Turn() {
-    override fun perform(game: Game) = game.performEnPassant(this)
+    override fun perform(game: Game) {
+        super.perform(game)
+        game.performEnPassant(this)
+    }
 }
