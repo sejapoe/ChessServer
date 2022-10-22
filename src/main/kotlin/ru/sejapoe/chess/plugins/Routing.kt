@@ -61,7 +61,7 @@ fun Application.configureRouting() {
             try {
                 game.perform(call.receive())
             } catch (e: Exception) {
-                println(e.localizedMessage)
+                println(e)
                 return@post call.respond(HttpStatusCode.BadRequest, e.localizedMessage)
             }
             call.respond(HttpStatusCode.OK)
